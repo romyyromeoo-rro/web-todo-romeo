@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TO-DO LIST - Romeo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #1a1a2e; color: #eee; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #16213e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { text-align: center; color: #00d4ff; margin-bottom: 20px; }
+    .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    input { flex: 1; padding: 12px; border: none; border-radius: 8px; background: #0f3460; color: white; }
+    button { padding: 12px 20px; background: #00d4ff; color: #000; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #00b0d4; }
+    ul { list-style: none; }
+    li { background: #0f3460; margin: 8px 0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+    li.completed { text-decoration: line-through; opacity: 0.6; }
+    .delete { background: #e94560; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    .empty { text-align: center; color: #888; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TO-DO LIST</h1>
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="Tulis tugas baru..." />
+      <button onclick="addTask()">+ TAMBAH</button>
+    </div>
+    <ul id="taskList">
+      <li class="empty">Belum ada tugas. Tambah sekarang!</li>
+    </ul>
+  </div>
+
+  <script>
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+
+    // Load tasks
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      taskList.innerHTML = '';
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<li class="empty">Belum ada tugas. Tambah sekarang!</li>';
+        return;
+      }
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span onclick="toggleTask(${index})" style="cursor:pointer;">${task.text}</span>
+          <button class="delete" onclick="deleteTask(${index})">X</button>
+        `;
+        if (task.completed) li.classList.add('completed');
+        taskList.appendChild(li);
+      });
+    }
+
+    // Add task
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.push({ text, completed: false });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      taskInput.value = '';
+      loadTasks();
+    }
+
+    // Toggle complete
+    function toggleTask(index) {
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks[index].completed = !tasks[index].completed;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    // Delete task
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.splice(index, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      loadTasks();
+    }
+
+    // Enter key
+    taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+
+    // Init
+    loadTasks();
+  </script>
+</body>
+</html>
